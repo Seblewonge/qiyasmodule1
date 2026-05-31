@@ -1,4 +1,5 @@
-﻿string? region = null;
+﻿using System.Linq;
+string? region = null;
 Console.WriteLine(region?.ToUpper());
 // Null-conditional operator '?.' — skip the call if null
 // If region is null, ToUpper() never executes. No crash. string? upperRegion = region?.ToUpper();
@@ -77,3 +78,170 @@ IGradable[] cohortAssessments = [
 new Quiz { Title = "C# Basics", CorrectAnswers = 18, TotalQuestions = 20 }, new LabAssignment { Title = "Registration API", FunctionalityScore = 90m, CodeQualityScore=85m }
 ];
 PrintGradeReport(cohortAssessments);
+
+var service = new EnrollmentService();
+// Test 1: Valid registration
+var validStudent = new Student { Id = "S1", Name = "Abeba", Age = 20, GPA = 3.8m};
+var validCourse = new Course { Code = "CS-401", Title = "Advanced C#", Capacity = 30 };
+var result = service.ProcessRegistration(validStudent, validCourse);
+Console.WriteLine($"Enrolled: {result.StudentId} in {result.CourseCode}");
+// Test 2: Null student should throw
+try
+{
+service.ProcessRegistration(null, validCourse);
+}
+catch (ArgumentNullException ex)
+{
+Console.WriteLine($"Guard caught: {ex.ParamName}");
+}
+// Test 3: Full course should throw
+var fullCourse = new Course { Code = "CS-402", Title = "Full Course", Capacity = 1 };
+fullCourse.EnrolledCount = 1;
+try
+{
+service.ProcessRegistration(validStudent, fullCourse);
+}
+catch (InvalidOperationException ex)
+{
+Console.WriteLine($"Business rule: {ex.Message}");
+}
+
+// List<Student> students = [
+// new Student { Id = "S1", Name = "Abeba", Age = 22, GPA = 3.8m }, 
+// new Student { Id = "S2", Name = "Kidane", Age = 21, GPA = 2.4m }, 
+// new Student { Id = "S3", Name = "Dawit", Age = 20, GPA = 3.1m }, 
+// new Student { Id = "S4", Name = "Sara", Age = 23, GPA = 3.9m }, 
+// new Student { Id = "S5", Name = "Frehiwot", Age = 19, GPA = 2.0m }, 
+// new Student { Id = "S6", Name = "Yonas", Age = 24, GPA = 3.5m },
+//  new Student { Id = "S7", Name = "Meron", Age = 22, GPA = 1.8m },
+//  new Student { Id = "S8", Name = "Tesfaye", Age = 21, GPA = 2.9m }
+// ];
+// var leaderboard = students;
+// var honorStudents = students.Where( student => student.GPA >= 3.5m);
+// Console.WriteLine($"Honor Students :({honorStudents.Count()})");
+// var ranked = students.OrderByDescending(student => student.GPA);
+
+// var loaderboard = students.OrderByDescending(student => student.GPA)
+// .Select((student => new { student.Name, student.GPA }));
+// Console.WriteLine($"Found {leaderboard.Count()} Honors Students:");
+// foreach (var student  in leaderboard)
+// {
+// Console.WriteLine($"- {student.Name}");
+// }
+// decimal averageGap = students.Average(student => student.GPA);
+// Console.WriteLine($"class Average GPA: {averageGap:F2}");
+
+// int atRisk = students.Count(student => student.GPA < 2.0m);
+// Console.WriteLine($"At-risk students: {atRisk}");
+
+// Student? topStudent = students.MaxBy(student => student.GPA);
+// Console.WriteLine($"Top student: {topStudent?.Name ?? "None"}");
+
+// bool hasProbation = students.Any(student => student.GPA < 2.5m);
+// Console.WriteLine($"Has probation cases :{hasProbation}");
+
+// var standingGroups = students.GroupBy(student => student.GPA 
+// switch
+// {
+//     >= 3.5m => "Honors",
+//     >= 2.5m => "Good Standing",
+//     >= 2.0m => "Probation",
+//     < 2.0m => "Academic Warning"
+// });
+
+// Console.WriteLine("\n--- Academic Standing Report ---");
+
+// foreach (var group in standingGroups)
+// {
+//     Console.WriteLine($"\n{group.Key} ({group.Count()}):");
+
+//     foreach (var s in group)
+//     {
+//         Console.WriteLine($" {s.Name} GPA: {s.GPA}");
+//     }
+// }
+// //string[] allCourses = [..backendCourses, ..frontendCourses, "SQL"];
+// string[] backendCourses = ["C#", "ASP.NET Core"];
+// string[] frontendCourses = ["TypeScript", "Angular"];
+
+// string[] allCourses = [..backendCourses, ..frontendCourses, "SQL"];
+
+// Console.WriteLine($"\nFull curriculum: {string.Join(", ", allCourses)}");
+
+List<Student> students = new List<Student>
+{
+    new Student { Id = "S1", Name = "Abeba", Age = 22, GPA = 3.8m },
+    new Student { Id = "S2", Name = "Kidane", Age = 21, GPA = 2.4m },
+    new Student { Id = "S3", Name = "Dawit", Age = 20, GPA = 3.1m },
+    new Student { Id = "S4", Name = "Sara", Age = 23, GPA = 3.9m },
+    new Student { Id = "S5", Name = "Frehiwot", Age = 19, GPA = 2.0m },
+    new Student { Id = "S6", Name = "Yonas", Age = 24, GPA = 3.5m },
+    new Student { Id = "S7", Name = "Meron", Age = 22, GPA = 1.8m },
+    new Student { Id = "S8", Name = "Tesfaye", Age = 21, GPA = 2.9m }
+};
+
+var leaderboard = students;
+
+var honorStudents = students.Where(student => student.GPA >= 3.5m);
+
+Console.WriteLine($"Honor Students: ({honorStudents.Count()})");
+
+var ranked = students.OrderByDescending(student => student.GPA);
+
+var leaderboardData = students
+    .OrderByDescending(student => student.GPA)
+    .Select(student => new { student.Name, student.GPA });
+
+Console.WriteLine($"Found {honorStudents.Count()} Honor Students:");
+
+foreach (var student in leaderboard)
+{
+    Console.WriteLine($"- {student.Name}");
+}
+
+decimal averageGap = students.Average(student => student.GPA);
+
+Console.WriteLine($"Class Average GPA: {averageGap:F2}");
+
+int atRisk = students.Count(student => student.GPA < 2.0m);
+
+Console.WriteLine($"At-risk students: {atRisk}");
+
+Student? topStudent = students.MaxBy(student => student.GPA);
+
+Console.WriteLine($"Top student: {topStudent?.Name ?? "None"}");
+
+bool hasProbation = students.Any(student => student.GPA < 2.5m);
+
+Console.WriteLine($"Has probation cases: {hasProbation}");
+
+var standingGroups = students.GroupBy(student => student.GPA switch
+{
+    >= 3.5m => "Honors",
+    >= 2.5m => "Good Standing",
+    >= 2.0m => "Probation",
+    _ => "Academic Warning"
+});
+
+Console.WriteLine("\n--- Academic Standing Report ---");
+
+foreach (var group in standingGroups)
+{
+    Console.WriteLine($"\n{group.Key} ({group.Count()}):");
+
+    foreach (var student in group)
+    {
+        Console.WriteLine($" {student.Name} GPA: {student.GPA}");
+    }
+}
+
+string[] backendCourses = { "C#", "ASP.NET Core" };
+
+string[] frontendCourses = { "TypeScript", "Angular" };
+
+string[] allCourses = backendCourses
+    .Concat(frontendCourses)
+    .Append("SQL")
+    .ToArray();
+
+Console.WriteLine($"\nFull curriculum: {string.Join(", ", allCourses)}");
